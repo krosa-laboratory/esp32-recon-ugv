@@ -45,11 +45,6 @@ void webSocketEventHandler(uint8_t number, WStype_t type, uint8_t* payload, size
             target_speed_left = data.substring(0, comma_index).toInt();
             target_speed_right = data.substring(comma_index + 1).toInt();
 
-            Serial.printf(
-                "- Received command -> L motor: %d | R motor: %d\n",
-                target_speed_left, target_speed_right
-            );
-
             last_command_time = millis();
 
         }
@@ -89,7 +84,6 @@ void updateMotors() {
     } else { // In this case we calculate the PWM value with the speed received
 
         int left_pwm = map(abs(target_speed_left), 0, 100, 0, 255);
-        Serial.printf("-- LEFT PWM adjusted to %d\n", left_pwm);
 
         if (target_speed_left > 0) {
             ledcWrite(CHANNEL_L1, left_pwm);
@@ -108,7 +102,6 @@ void updateMotors() {
     } else { // In this case we calculate the PWM value with the speed received
 
         int right_pwm = map(abs(target_speed_right), 0, 100, 0, 255);
-        Serial.printf("-- RIGHT PWM adjusted to %d\n", right_pwm);
 
         if (target_speed_right > 0) {
             ledcWrite(CHANNEL_R1, right_pwm);
@@ -125,26 +118,17 @@ void updateMotors() {
 
 void setup() {
 
-    Serial.begin(115200);
-    Serial.println("--- Starting UGV...");
-
     setupMotors();
 
     WiFi.softAP(ssid, pswd);
-
-    IPAddress IP = WiFi.softAPIP();
-    Serial.print("--> Access Point created. UGV IP: ");
-    Serial.println(IP);
 
     Server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send_P(200, "text/html", index_html);
     });
     Server.begin();
-    Serial.println("--> HTTP Server started in port 80. UI ready.");
 
     WebSocket.begin();
     WebSocket.onEvent(webSocketEventHandler);
-    Serial.println("--> Web Socket started in port 81, waiting commands...");
 
 }
 
@@ -162,7 +146,7 @@ void loop() {
         if (target_speed_left != 0 || target_speed_right != 0) {
             target_speed_left = 0;
             target_speed_right = 0;
-            Serial.println("-- CUATION: Connection Lost! UGV Stopped.");
+
         }
     }
 
