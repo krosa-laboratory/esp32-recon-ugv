@@ -1,22 +1,29 @@
 #include <Arduino.h>
+#include <WiFi.h>
+#include <ESPAsyncWebServer.h>
+#include <WebSocketsServer.h>
 
-#define LED_BUILTIN_PCB 33
+const char* ssid = "ReconScout_UGV";
+const char* pswd = "ReConScouT_001";
+
+AsyncWebServer Server(80);
+WebSocketsServer WebSocket = WebSocketsServer(81);
 
 void setup() {
 
     Serial.begin(115200);
-    pinMode(LED_BUILTIN_PCB, OUTPUT);
-    Serial.println("\n--- UGV Recon Unit: Test ---\nState: ON");
+    Serial.print("--- Starting UGV...");
+
+    WiFi.softAP(ssid, pswd);
+
+    IPAddress IP = WiFi.softAPIP();
+    Serial.print(" Access Point created. UGV IP:");
+    Serial.println(IP);
 
 }
 
 void loop() {
 
-    digitalWrite(LED_BUILTIN_PCB, LOW);
-    Serial.println("LED ON");
-    delay(1000);
-    digitalWrite(LED_BUILTIN_PCB, HIGH);
-    Serial.println("LED OFF");
-    delay(1000);
+    WebSocket.loop();
 
 }
