@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
+#include "WebPage.h"
 
 
 // Access Points credentials
@@ -45,17 +46,23 @@ void webSocketEventHandler(uint8_t number, WStype_t type, uint8_t* payload, size
 void setup() {
 
     Serial.begin(115200);
-    Serial.print("--- Starting UGV...");
+    Serial.println("--- Starting UGV...");
 
     WiFi.softAP(ssid, pswd);
 
     IPAddress IP = WiFi.softAPIP();
-    Serial.print(" Access Point created. UGV IP:");
+    Serial.print("--> Access Point created. UGV IP: ");
     Serial.println(IP);
+
+    Server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send_P(200, "text/html", index_html);
+    });
+    Server.begin();
+    Serial.println("--> HTTP Server started in port 80. UI ready.");
 
     WebSocket.begin();
     WebSocket.onEvent(webSocketEventHandler);
-    Serial.println("--- Web Socket started in port 81, waiting commands...");
+    Serial.println("--> Web Socket started in port 81, waiting commands...");
 
 }
 
